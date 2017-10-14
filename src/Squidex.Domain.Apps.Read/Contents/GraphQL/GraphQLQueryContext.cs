@@ -11,6 +11,7 @@ using System.Collections.Generic;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
+using Squidex.Domain.Apps.Core.Contents;
 using Squidex.Domain.Apps.Read.Apps;
 using Squidex.Domain.Apps.Read.Assets;
 using Squidex.Domain.Apps.Read.Assets.Repositories;
@@ -35,7 +36,7 @@ namespace Squidex.Domain.Apps.Read.Contents.GraphQL
             return GetReferencedAssetsAsync(ids);
         }
 
-        public Task<IReadOnlyList<IContentEntity>> GetReferencedContentsAsync(Guid schemaId, JToken value)
+        public Task<IReadOnlyList<Content>> GetReferencedContentsAsync(Guid schemaId, JToken value)
         {
             var ids = ParseIds(value);
 

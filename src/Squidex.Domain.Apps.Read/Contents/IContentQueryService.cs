@@ -10,19 +10,20 @@ using System;
 using System.Collections.Generic;
 using System.Security.Claims;
 using System.Threading.Tasks;
-using Squidex.Domain.Apps.Read.Apps;
-using Squidex.Domain.Apps.Read.Schemas;
+using Squidex.Domain.Apps.Core.Apps;
+using Squidex.Domain.Apps.Core.Contents;
+using Squidex.Domain.Apps.Core.Schemas;
 
 namespace Squidex.Domain.Apps.Read.Contents
 {
     public interface IContentQueryService
     {
-        Task<(ISchemaEntity Schema, long Total, IReadOnlyList<IContentEntity> Items)> QueryWithCountAsync(IAppEntity app, string schemaIdOrName, ClaimsPrincipal user, bool archived, HashSet<Guid> ids);
+        Task<(Schema Schema, long Total, IReadOnlyList<Content> Items)> QueryWithCountAsync(App app, string schemaIdOrName, ClaimsPrincipal user, bool archived, HashSet<Guid> ids);
 
-        Task<(ISchemaEntity Schema, long Total, IReadOnlyList<IContentEntity> Items)> QueryWithCountAsync(IAppEntity app, string schemaIdOrName, ClaimsPrincipal user, bool archived, string query);
+        Task<(Schema Schema, long Total, IReadOnlyList<Content> Items)> QueryWithCountAsync(App app, string schemaIdOrName, ClaimsPrincipal user, bool archived, string query);
 
-        Task<(ISchemaEntity Schema, IContentEntity Content)> FindContentAsync(IAppEntity app, string schemaIdOrName, ClaimsPrincipal user, Guid id);
+        Task<(Schema Schema, Content Content)> FindContentAsync(App app, string schemaIdOrName, ClaimsPrincipal user, Guid id);
 
-        Task<ISchemaEntity> FindSchemaAsync(IAppEntity app, string schemaIdOrName);
+        Task<Schema> FindSchemaAsync(App app, string schemaIdOrName);
     }
 }

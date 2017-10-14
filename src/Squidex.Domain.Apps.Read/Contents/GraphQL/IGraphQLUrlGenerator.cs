@@ -6,6 +6,7 @@
 //  All rights reserved.
 // ==========================================================================
 
+using Squidex.Domain.Apps.Core.Contents;
 using Squidex.Domain.Apps.Read.Apps;
 using Squidex.Domain.Apps.Read.Assets;
 using Squidex.Domain.Apps.Read.Schemas;
@@ -22,6 +23,6 @@ namespace Squidex.Domain.Apps.Read.Contents.GraphQL
 
         string GenerateAssetSourceUrl(IAppEntity app, IAssetEntity asset);
 
-        string GenerateContentUrl(IAppEntity app, ISchemaEntity schema, IContentEntity content);
+        string GenerateContentUrl(IAppEntity app, ISchemaEntity schema, Content content);
     }
 }

@@ -65,10 +65,15 @@ namespace Squidex.Domain.Apps.Core
 
         protected T Update<T>(Instant now, RefToken actor, Action<T> updater) where T : class
         {
-            return (T)Clone(now, actor, x => updater(x as T));
+            return (T)Clone(now, actor, true, x => updater(x as T));
         }
 
-        private object Clone(Instant now, RefToken actor, Action<object> updater)
+        protected T UpdateWithoutVersion<T>(Action<T> updater) where T : class
+        {
+            return (T)Clone(LastModified, LastModifiedBy, false, x => updater(x as T));
+        }
+
+        private object Clone(Instant now, RefToken actor, bool updateVersion, Action<object> updater)
         {
             Guard.NotNull(actor, nameof(actor));
             Guard.NotNull(updater, nameof(updater));
@@ -77,7 +82,10 @@ namespace Squidex.Domain.Apps.Core
 
             updater(clone);
 
-            clone.version++;
+            if (updateVersion)
+            {
+                clone.version++;
+            }
 
             clone.lastModified = now;
             clone.lastModifiedBy = actor;

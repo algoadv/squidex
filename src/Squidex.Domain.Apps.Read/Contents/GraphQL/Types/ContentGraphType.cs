@@ -1,5 +1,5 @@
 ﻿// ==========================================================================
-//  SchemaGraphType.cs
+//  ContentGraphType.cs
 //  Squidex Headless CMS
 // ==========================================================================
 //  Copyright (c) Squidex Group
@@ -10,12 +10,13 @@ using System;
 using System.Linq;
 using GraphQL.Resolvers;
 using GraphQL.Types;
+using Squidex.Domain.Apps.Core.Contents;
 using Squidex.Domain.Apps.Read.Schemas;
 using Squidex.Infrastructure;
 
 namespace Squidex.Domain.Apps.Read.Contents.GraphQL.Types
 {
-    public sealed class ContentGraphType : ObjectGraphType<IContentEntity>
+    public sealed class ContentGraphType : ObjectGraphType<Content>
     {
         private readonly ISchemaEntity schema;
         private readonly IGraphQLContext context;
@@ -104,9 +105,9 @@ namespace Squidex.Domain.Apps.Read.Contents.GraphQL.Types
             Description = $"The structure of a {schemaName} content type.";
         }
 
-        private static IFieldResolver Resolver(Func<IContentEntity, object> action)
+        private static IFieldResolver Resolver(Func<Content, object> action)
         {
-            return new FuncFieldResolver<IContentEntity, object>(c => action(c.Source));
+            return new FuncFieldResolver<Content, object>(c => action(c.Source));
         }
     }
 }

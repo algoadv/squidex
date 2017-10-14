@@ -38,19 +38,7 @@ namespace Squidex.Domain.Apps.Core.Schemas.Json
 
                 var model = new JsonSchemaModel
                 {
-                    Id = schema.Id,
-                    Name = schema.Name,
-                    Created = schema.Created,
-                    CreatedBy = schema.CreatedBy,
-                    IsPublished = schema.IsPublished,
-                    LastModified = schema.LastModified,
-                    LastModifiedBy = schema.LastModifiedBy,
-                    Properties = schema.Properties,
-                    ScriptQuery = schema.ScriptQuery,
-                    ScriptCreate = schema.ScriptCreate,
-                    ScriptUpdate = schema.ScriptUpdate,
-                    ScriptChange = schema.ScriptChange,
-                    ScriptDelete = schema.ScriptDelete,
+                    Name = schema.Name
                 };
 
                 model.Fields =
@@ -62,7 +50,7 @@ namespace Squidex.Domain.Apps.Core.Schemas.Json
                             IsHidden = x.IsHidden,
                             IsLocked = x.IsLocked,
                             IsDisabled = x.IsDisabled,
-                            Partitioning = x.Paritioning.Key,
+                            Partitioning = x.Partitioning.Key,
                             Properties = x.RawProperties
                         }).ToList();
 
@@ -100,23 +88,7 @@ namespace Squidex.Domain.Apps.Core.Schemas.Json
 
             var model = serializer.Deserialize<JsonSchemaModel>(reader);
 
-            var schema = Schema.Create(model.Id, model.Name, model.Created, model.CreatedBy);
-
-            schema =
-                schema.Update(
-                    model.LastModified,
-                    model.LastModifiedBy,
-                    model.Properties);
-
-            schema =
-                schema.ConfigureScripts(
-                    model.LastModified,
-                    model.LastModifiedBy,
-                    model.ScriptQuery,
-                    model.ScriptCreate,
-                    model.ScriptUpdate,
-                    model.ScriptChange,
-                    model.ScriptDelete);
+            var schema = Schema.Create(model.Name, model.Properties);
 
             foreach (var fieldModel in model.Fields)
             {
@@ -139,7 +111,7 @@ namespace Squidex.Domain.Apps.Core.Schemas.Json
                     field = field.Hide();
                 }
 
-                schema = schema.AddOrUpdateField(model.LastModified, model.LastModifiedBy, field);
+                schema = schema.AddField(field);
             }
 
             reader.Read();

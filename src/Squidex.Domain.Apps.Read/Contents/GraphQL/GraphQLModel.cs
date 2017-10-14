@@ -138,7 +138,7 @@ namespace Squidex.Domain.Apps.Read.Contents.GraphQL
 
         public IFieldResolver ResolveContentUrl(ISchemaEntity schema)
         {
-            var resolver = new FuncFieldResolver<IContentEntity, object>(c =>
+            var resolver = new FuncFieldResolver<Content, object>(c =>
             {
                 var context = (GraphQLQueryContext)c.UserContext;
 

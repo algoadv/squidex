@@ -14,7 +14,7 @@ using Squidex.Infrastructure;
 
 namespace Squidex.Domain.Apps.Core.Schemas
 {
-    public abstract class Field : CloneableBase
+    public abstract class Field : Cloneable<Field>
     {
         private readonly Lazy<List<IValidator>> validators;
         private readonly long fieldId;
@@ -83,27 +83,42 @@ namespace Squidex.Domain.Apps.Core.Schemas
 
         public Field Lock()
         {
-            return Clone<Field>(clone => clone.isLocked = true);
+            return Clone(clone =>
+            {
+                clone.isLocked = true;
+            });
         }
 
         public Field Hide()
         {
-            return Clone<Field>(clone => clone.isHidden = true);
+            return Clone(clone =>
+            {
+                clone.isHidden = true;
+            });
         }
 
         public Field Show()
         {
-            return Clone<Field>(clone => clone.isHidden = false);
+            return Clone(clone =>
+            {
+                clone.isHidden = false;
+            });
         }
 
         public Field Disable()
         {
-            return Clone<Field>(clone => clone.isDisabled = true);
+            return Clone(clone =>
+            {
+                clone.isDisabled = true;
+            });
         }
 
         public Field Enable()
         {
-            return Clone<Field>(clone => clone.isDisabled = false);
+            return Clone(clone =>
+            {
+                clone.isDisabled = false;
+            });
         }
 
         public Field Update(FieldProperties newProperties)

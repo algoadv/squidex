@@ -10,18 +10,19 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+using NodaTime;
 using Squidex.Infrastructure;
 
 namespace Squidex.Domain.Apps.Core.Schemas
 {
-    public sealed class Schema
+    public sealed class Schema : ImmutableDomainObject
     {
         private readonly string name;
-        private readonly SchemaProperties properties;
-        private readonly ImmutableList<Field> fields;
-        private readonly ImmutableDictionary<long, Field> fieldsById;
-        private readonly ImmutableDictionary<string, Field> fieldsByName;
-        private readonly bool isPublished;
+        private SchemaProperties properties = new SchemaProperties();
+        private ImmutableList<Field> fields = ImmutableList<Field>.Empty;
+        private ImmutableDictionary<long, Field> fieldsById;
+        private ImmutableDictionary<string, Field> fieldsByName;
+        private bool isPublished;
 
         public string Name
         {
@@ -53,28 +54,25 @@ namespace Squidex.Domain.Apps.Core.Schemas
             get { return properties; }
         }
 
-        public Schema(string name, bool isPublished, SchemaProperties properties, ImmutableList<Field> fields)
+        private Schema(Guid id, Instant now, RefToken actor, string name, SchemaProperties properties)
+            : base(id, now, actor)
         {
-            Guard.NotNull(fields, nameof(fields));
-            Guard.NotNull(properties, nameof(properties));
-            Guard.NotNullOrEmpty(name, nameof(name));
+            this.name = name;
 
+            this.properties = properties;
+        }
+
+        public override void OnInit()
+        {
             fieldsById = fields.ToImmutableDictionary(x => x.Id);
             fieldsByName = fields.ToImmutableDictionary(x => x.Name, StringComparer.OrdinalIgnoreCase);
 
-            this.name = name;
-
-            this.fields = fields;
-
-            this.properties = properties;
-            this.properties.Freeze();
-
-            this.isPublished = isPublished;
+            properties.Freeze();
         }
 
-        public static Schema Create(string name, SchemaProperties newProperties)
+        public static Schema Create(Guid id, Instant now, RefToken actor, string name, SchemaProperties properties)
         {
-            return new Schema(name, false, newProperties, ImmutableList<Field>.Empty);
+            return new Schema(id, now, actor, name, properties);
         }
 
         public Schema Update(SchemaProperties newProperties)

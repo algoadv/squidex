@@ -17,17 +17,15 @@ using Newtonsoft.Json.Linq;
 using NodaTime;
 using Squidex.Domain.Apps.Core.Contents;
 using Squidex.Domain.Apps.Core.Schemas;
-using Squidex.Domain.Apps.Read.Contents;
 using Squidex.Infrastructure;
 using Squidex.Infrastructure.MongoDb;
 using JsonConvert = Newtonsoft.Json.JsonConvert;
 
 namespace Squidex.Domain.Apps.Read.MongoDb.Contents
 {
-    public sealed class MongoContentEntity : IContentEntity, IMongoEntity
+    public sealed class MongoContentEntity
     {
         private const int MaxLength = 1024 * 1024;
-        private static readonly JsonWriterSettings Settings = new JsonWriterSettings { OutputMode = JsonOutputMode.Strict };
         private NamedContentData contentData;
 
         [BsonId]
@@ -36,25 +34,8 @@ namespace Squidex.Domain.Apps.Read.MongoDb.Contents
         public Guid Id { get; set; }
 
         [BsonRequired]
-        [BsonElement("st")]
-        [BsonRepresentation(BsonType.String)]
-        public Status Status { get; set; }
-
-        [BsonRequired]
-        [BsonElement("ct")]
-        public Instant Created { get; set; }
-
-        [BsonRequired]
-        [BsonElement("mt")]
-        public Instant LastModified { get; set; }
-
-        [BsonRequired]
         [BsonElement("dt")]
         public string DataText { get; set; }
-
-        [BsonRequired]
-        [BsonElement("vs")]
-        public long Version { get; set; }
 
         [BsonRequired]
         [BsonElement("ai")]
@@ -63,18 +44,6 @@ namespace Squidex.Domain.Apps.Read.MongoDb.Contents
         [BsonRequired]
         [BsonElement("si")]
         public Guid SchemaId { get; set; }
-
-        [BsonRequired]
-        [BsonElement("cb")]
-        public RefToken CreatedBy { get; set; }
-
-        [BsonRequired]
-        [BsonElement("mb")]
-        public RefToken LastModifiedBy { get; set; }
-
-        [BsonRequired]
-        [BsonElement("do")]
-        public BsonDocument DataObject { get; set; }
 
         [BsonRequired]
         [BsonElement("rf")]

@@ -54,7 +54,7 @@ namespace Squidex.Domain.Apps.Core
             this.master = master;
         }
 
-        public static LanguagesConfig Create(ICollection<LanguageConfig> languageConfigs)
+        public static LanguagesConfig Create(IEnumerable<LanguageConfig> languageConfigs)
         {
             Guard.NotNull(languageConfigs, nameof(languageConfigs));
 

@@ -16,7 +16,7 @@ namespace Squidex.Domain.Apps.Events.Schemas.Utils
     {
         public static Schema Dispatch(SchemaCreated @event, FieldRegistry registry)
         {
-            var schema = Schema.Create(@event.SchemaId.Id, @event.Name).Update(@event.Properties);
+            var schema = Schema.Create(@event.Name, @event.Properties);
 
             if (@event.Fields != null)
             {

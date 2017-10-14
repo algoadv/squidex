@@ -12,24 +12,26 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using Squidex.Domain.Apps.Core.Contents;
 using Squidex.Domain.Apps.Read.Apps;
 using Squidex.Domain.Apps.Read.Assets;
 using Squidex.Domain.Apps.Read.Assets.Repositories;
 using Squidex.Infrastructure;
+using Squidex.Domain.Apps.Core.Apps;
 
 namespace Squidex.Domain.Apps.Read.Contents
 {
     public class QueryContext
     {
-        private readonly ConcurrentDictionary<Guid, IContentEntity> cachedContents = new ConcurrentDictionary<Guid, IContentEntity>();
+        private readonly ConcurrentDictionary<Guid, Content> cachedContents = new ConcurrentDictionary<Guid, Content>();
         private readonly ConcurrentDictionary<Guid, IAssetEntity> cachedAssets = new ConcurrentDictionary<Guid, IAssetEntity>();
         private readonly IContentQueryService contentQuery;
         private readonly IAssetRepository assetRepository;
-        private readonly IAppEntity app;
+        private readonly App app;
         private readonly ClaimsPrincipal user;
 
         public QueryContext(
-            IAppEntity app,
+            App app,
             IAssetRepository assetRepository,
             IContentQueryService contentQuery,
             ClaimsPrincipal user)
@@ -64,7 +66,7 @@ namespace Squidex.Domain.Apps.Read.Contents
             return asset;
         }
 
-        public async Task<IContentEntity> FindContentAsync(Guid schemaId, Guid id)
+        public async Task<Content> FindContentAsync(Guid schemaId, Guid id)
         {
             var content = cachedContents.GetOrDefault(id);
 
@@ -93,7 +95,7 @@ namespace Squidex.Domain.Apps.Read.Contents
             return assets;
         }
 
-        public async Task<IReadOnlyList<IContentEntity>> QueryContentsAsync(string schemaIdOrName, string query)
+        public async Task<IReadOnlyList<Content>> QueryContentsAsync(string schemaIdOrName, string query)
         {
             var contents = (await contentQuery.QueryWithCountAsync(app, schemaIdOrName, user, false, query).ConfigureAwait(false)).Items;
 
@@ -124,7 +126,7 @@ namespace Squidex.Domain.Apps.Read.Contents
             return ids.Select(id => cachedAssets.GetOrDefault(id)).Where(x => x != null).ToList();
         }
 
-        public async Task<IReadOnlyList<IContentEntity>> GetReferencedContentsAsync(Guid schemaId, ICollection<Guid> ids)
+        public async Task<IReadOnlyList<Content>> GetReferencedContentsAsync(Guid schemaId, ICollection<Guid> ids)
         {
             Guard.NotNull(ids, nameof(ids));
 

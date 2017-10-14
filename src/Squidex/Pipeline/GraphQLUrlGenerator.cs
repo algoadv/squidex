@@ -8,6 +8,7 @@
 
 using Microsoft.Extensions.Options;
 using Squidex.Config;
+using Squidex.Domain.Apps.Core.Contents;
 using Squidex.Domain.Apps.Read.Apps;
 using Squidex.Domain.Apps.Read.Assets;
 using Squidex.Domain.Apps.Read.Contents;
@@ -47,7 +48,7 @@ namespace Squidex.Pipeline
             return urlsOptions.BuildUrl($"api/assets/{asset.Id}?version={asset.Version}");
         }
 
-        public string GenerateContentUrl(IAppEntity app, ISchemaEntity schema, IContentEntity content)
+        public string GenerateContentUrl(IAppEntity app, ISchemaEntity schema, Content content)
         {
             return urlsOptions.BuildUrl($"api/content/{app.Name}/{schema.Name}/{content.Id}");
         }

@@ -8,6 +8,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using NodaTime;
 using Squidex.Infrastructure;
 
@@ -16,8 +17,8 @@ namespace Squidex.Domain.Apps.Core.Apps
     public sealed class App : ImmutableDomainObject
     {
         private readonly string name;
+        private ImmutableDictionary<string, AppContributorPermission> contributors = ImmutableDictionary<string, AppContributorPermission>.Empty;
         private AppClients clients = AppClients.Empty;
-        private AppContributors contributors = AppContributors.Empty;
         private LanguagesConfig languages = LanguagesConfig.Create(Language.EN);
         private RefToken planOwner;
         private string planId;
@@ -54,75 +55,67 @@ namespace Squidex.Domain.Apps.Core.Apps
 
         public IReadOnlyDictionary<string, AppContributorPermission> Contributors
         {
-            get { return contributors.Contributors; }
+            get { return contributors; }
         }
 
-        private App(Guid id, string name, Instant now, RefToken actor)
+        private App(Guid id, Instant now, RefToken actor, string name)
             : base(id, now, actor)
         {
             this.name = name;
         }
 
-        public static App Create(Guid id, string name, Instant now, RefToken actor)
+        public static App Create(Guid id, Instant now, RefToken actor, string name)
         {
-            Guard.NotEmpty(id, nameof(id));
+            Guard.NotNullOrEmpty(name, nameof(name));
 
-            if (!name.IsSlug())
+            return new App(id, now, actor, name);
+        }
+
+        public App ChangePlan(Instant now, RefToken newPlanOwner, string newPlanId)
+        {
+            return Update<App>(now, newPlanOwner, clone =>
             {
-                var error = new ValidationError("Name must be a valid slug", "Name");
-
-                throw new ValidationException("Cannot create a new app", error);
-            }
-
-            return new App(id, name, now, actor);
+                clone.planId = newPlanId;
+                clone.planOwner = newPlanOwner;
+            });
         }
 
         public App UpdateLanguages(Instant now, RefToken actor, Func<LanguagesConfig, LanguagesConfig> updater)
         {
-            return Update<App>(now, actor, clone =>
-            {
-                clone.languages = updater?.Invoke(languages) ?? clone.languages;
-            });
-        }
+            Guard.NotNull(updater, nameof(updater));
 
-        public App UpdateContributors(Instant now, RefToken actor, Func<AppContributors, AppContributors> updater)
-        {
             return Update<App>(now, actor, clone =>
             {
-                clone.contributors = updater?.Invoke(contributors) ?? clone.contributors;
+                clone.languages = updater(languages) ?? clone.languages;
             });
         }
 
         public App UpdateClients(Instant now, RefToken actor, Func<AppClients, AppClients> updater)
         {
-            return Update<App>(now, actor, clone =>
-            {
-                clone.clients = updater?.Invoke(clients) ?? clone.clients;
-            });
-        }
-
-        public App ChangePlan(Instant now, RefToken actor, string newPlanId)
-        {
-            ThrowIfOtherUser(newPlanId, actor);
+            Guard.NotNull(updater, nameof(updater));
 
             return Update<App>(now, actor, clone =>
             {
-                clone.planId = newPlanId;
-                clone.planOwner = actor;
+                clone.clients = updater(clients) ?? clone.clients;
             });
         }
 
-        private void ThrowIfOtherUser(string newPlanId, RefToken actor)
+        public App AssignContributor(Instant now, RefToken actor, string contributorId, AppContributorPermission permission)
         {
-            if (!string.IsNullOrWhiteSpace(newPlanId) && planOwner != null && !planOwner.Equals(actor))
-            {
-                throw new ValidationException("Plan can only be changed from current user.");
-            }
+            Guard.Enum(permission, nameof(permission));
 
-            if (string.Equals(newPlanId, planId, StringComparison.OrdinalIgnoreCase))
+            return Update<App>(now, actor, clone =>
             {
-                throw new ValidationException("App has already this plan.");
-            }
+                clone.contributors = contributors.SetItem(contributorId, permission);
+            });
+        }
+
+        public App RemoveContributor(Instant now, RefToken actor, string contributorId)
+        {
+            return Update<App>(now, actor, clone =>
+            {
+                clone.contributors = contributors.Remove(contributorId);
+            });
         }
     }
 }

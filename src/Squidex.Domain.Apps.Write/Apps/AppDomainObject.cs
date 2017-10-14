@@ -7,15 +7,14 @@
 // ==========================================================================
 
 using System;
-using Squidex.Domain.Apps.Core;
 using Squidex.Domain.Apps.Core.Apps;
 using Squidex.Domain.Apps.Events;
 using Squidex.Domain.Apps.Events.Apps;
+using Squidex.Domain.Apps.Events.Apps.Utils;
 using Squidex.Domain.Apps.Write.Apps.Commands;
 using Squidex.Infrastructure;
 using Squidex.Infrastructure.CQRS;
 using Squidex.Infrastructure.CQRS.Events;
-using Squidex.Infrastructure.Dispatching;
 using Squidex.Infrastructure.Reflection;
 
 namespace Squidex.Domain.Apps.Write.Apps
@@ -44,64 +43,9 @@ namespace Squidex.Domain.Apps.Write.Apps
         {
         }
 
-        protected void On(AppCreated @event)
-        {
-            app = App.Create(Id, @event.Name);
-        }
-
-        protected void On(AppContributorAssigned @event)
-        {
-            app = app.UpdateContributors(c => c.Assign(@event.ContributorId, @event.Permission));
-        }
-
-        protected void On(AppContributorRemoved @event)
-        {
-            app = app.UpdateContributors(c => c.Remove(@event.ContributorId));
-        }
-
-        protected void On(AppClientAttached @event)
-        {
-            app = app.UpdateClients(c => c.Add(@event.Id, @event.Secret));
-        }
-
-        protected void On(AppClientUpdated @event)
-        {
-            app = app.UpdateClients(c => c.Update(@event.Id, @event.Permission));
-        }
-
-        protected void On(AppClientRenamed @event)
-        {
-            app = app.UpdateClients(c => c.Rename(@event.Id, @event.Name));
-        }
-
-        protected void On(AppClientRevoked @event)
-        {
-            app = app.UpdateClients(c => c.Revoke(@event.Id));
-        }
-
-        protected void On(AppLanguageAdded @event)
-        {
-            app = app.UpdateLanguages(c => c.Add(@event.Language));
-        }
-
-        protected void On(AppLanguageRemoved @event)
-        {
-            app = app.UpdateLanguages(c => c.Remove(@event.Language));
-        }
-
-        protected void On(AppLanguageUpdated @event)
-        {
-            app = app.UpdateLanguages(c => c.Update(@event.Language, @event.IsOptional, @event.IsMaster, @event.Fallback));
-        }
-
-        protected void On(AppPlanChanged @event)
-        {
-            app = app.ChangePlan(@event.PlanId, @event.Actor);
-        }
-
         protected override void DispatchEvent(Envelope<IEvent> @event)
         {
-            this.DispatchAction(@event.Payload);
+            app = AppEventDispatcher.Dispatch(@event, app);
         }
 
         public AppDomainObject Create(CreateApp command)

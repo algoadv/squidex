@@ -15,6 +15,7 @@ using Microsoft.OData;
 using Microsoft.OData.UriParser;
 using NodaTime;
 using Squidex.Domain.Apps.Core.Contents;
+using Squidex.Domain.Apps.Core.Schemas;
 using Squidex.Domain.Apps.Core.Scripting;
 using Squidex.Domain.Apps.Read.Apps;
 using Squidex.Domain.Apps.Read.Contents.Edm;
@@ -24,6 +25,7 @@ using Squidex.Domain.Apps.Read.Schemas.Services;
 using Squidex.Infrastructure;
 using Squidex.Infrastructure.Reflection;
 using Squidex.Infrastructure.Security;
+using Squidex.Domain.Apps.Core.Apps;
 
 namespace Squidex.Domain.Apps.Read.Contents
 {
@@ -51,7 +53,7 @@ namespace Squidex.Domain.Apps.Read.Contents
             this.modelBuilder = modelBuilder;
         }
 
-        public async Task<(ISchemaEntity Schema, IContentEntity Content)> FindContentAsync(IAppEntity app, string schemaIdOrName, ClaimsPrincipal user, Guid id)
+        public async Task<(ISchemaEntity Schema, Content Content)> FindContentAsync(IAppEntity app, string schemaIdOrName, ClaimsPrincipal user, Guid id)
         {
             Guard.NotNull(app, nameof(app));
             Guard.NotNull(user, nameof(user));
@@ -68,12 +70,12 @@ namespace Squidex.Domain.Apps.Read.Contents
                 throw new DomainObjectNotFoundException(id.ToString(), typeof(ISchemaEntity));
             }
 
-            content = TransformContent(user, schema, new List<IContentEntity> { content })[0];
+            content = TransformContent(user, schema, new List<Content> { content })[0];
 
             return (schema, content);
         }
 
-        public async Task<(ISchemaEntity Schema, long Total, IReadOnlyList<IContentEntity> Items)> QueryWithCountAsync(IAppEntity app, string schemaIdOrName, ClaimsPrincipal user, bool archived, string query)
+        public async Task<(ISchemaEntity Schema, long Total, IReadOnlyList<Content> Items)> QueryWithCountAsync(IAppEntity app, string schemaIdOrName, ClaimsPrincipal user, bool archived, string query)
         {
             Guard.NotNull(app, nameof(app));
             Guard.NotNull(user, nameof(user));
@@ -95,7 +97,7 @@ namespace Squidex.Domain.Apps.Read.Contents
             return (schema, taskForCount.Result, list);
         }
 
-        public async Task<(ISchemaEntity Schema, long Total, IReadOnlyList<IContentEntity> Items)> QueryWithCountAsync(IAppEntity app, string schemaIdOrName, ClaimsPrincipal user, bool archived, HashSet<Guid> ids)
+        public async Task<(ISchemaEntity Schema, long Total, IReadOnlyList<Content> Items)> QueryWithCountAsync(IAppEntity app, string schemaIdOrName, ClaimsPrincipal user, bool archived, HashSet<Guid> ids)
         {
             Guard.NotNull(ids, nameof(ids));
             Guard.NotNull(app, nameof(app));
@@ -116,7 +118,7 @@ namespace Squidex.Domain.Apps.Read.Contents
             return (schema, taskForCount.Result, list);
         }
 
-        private List<IContentEntity> TransformContent(ClaimsPrincipal user, ISchemaEntity schema, List<IContentEntity> contents)
+        private List<Content> TransformContent(ClaimsPrincipal user, ISchemaEntity schema, List<Content> contents)
         {
             var scriptText = schema.ScriptQuery;
 
@@ -127,14 +129,14 @@ namespace Squidex.Domain.Apps.Read.Contents
                     var content = contents[i];
                     var contentData = scriptEngine.Transform(new ScriptContext { User = user, Data = content.Data, ContentId = content.Id }, scriptText);
 
-                    contents[i] = SimpleMapper.Map(content, new Content { Data = contentData });
+                    contents[i] = content.ReplaceContent(contentData);
                 }
             }
 
             return contents;
         }
 
-        private ODataUriParser ParseQuery(IAppEntity app, string query, ISchemaEntity schema)
+        private ODataUriParser ParseQuery(App app, string query, Schema schema)
         {
             try
             {
@@ -148,11 +150,11 @@ namespace Squidex.Domain.Apps.Read.Contents
             }
         }
 
-        public async Task<ISchemaEntity> FindSchemaAsync(IAppEntity app, string schemaIdOrName)
+        public async Task<Schema> FindSchemaAsync(App app, string schemaIdOrName)
         {
             Guard.NotNull(app, nameof(app));
 
-            ISchemaEntity schema = null;
+            Schema schema = null;
 
             if (Guid.TryParse(schemaIdOrName, out var id))
             {
@@ -194,24 +196,6 @@ namespace Squidex.Domain.Apps.Read.Contents
             }
 
             return status;
-        }
-
-        private sealed class Content : IContentEntity
-        {
-            public Guid Id { get; set; }
-            public Guid AppId { get; set; }
-
-            public long Version { get; set; }
-
-            public Instant Created { get; set; }
-            public Instant LastModified { get; set; }
-
-            public RefToken CreatedBy { get; set; }
-            public RefToken LastModifiedBy { get; set; }
-
-            public NamedContentData Data { get; set; }
-
-            public Status Status { get; set; }
         }
     }
 }

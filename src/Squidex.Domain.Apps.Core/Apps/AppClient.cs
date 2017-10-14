@@ -6,7 +6,6 @@
 //  All rights reserved.
 // ==========================================================================
 
-using System;
 using Squidex.Infrastructure;
 
 namespace Squidex.Domain.Apps.Core.Apps
@@ -43,26 +42,16 @@ namespace Squidex.Domain.Apps.Core.Apps
             this.permission = permission;
         }
 
-        public AppClient Update(AppClientPermission newPermission, Func<string> message)
+        public AppClient Update(AppClientPermission newPermission)
         {
-            if (permission == newPermission)
-            {
-                var error = new ValidationError("Client has already the permission.", "IsReader");
-
-                throw new ValidationException(message(), error);
-            }
+            Guard.Enum(newPermission, nameof(newPermission));
 
             return new AppClient(secret, name, newPermission);
         }
 
-        public AppClient Rename(string newName, Func<string> message)
+        public AppClient Rename(string newName)
         {
-            if (string.Equals(name, newName))
-            {
-                var error = new ValidationError("Client already has the name.", "Id");
-
-                throw new ValidationException(message(), error);
-            }
+            Guard.NotNullOrEmpty(newName, nameof(newName));
 
             return new AppClient(secret, newName, permission);
         }
