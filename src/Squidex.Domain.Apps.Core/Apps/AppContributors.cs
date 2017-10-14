@@ -67,7 +67,7 @@ namespace Squidex.Domain.Apps.Core.Apps
         {
             if (contributors.TryGetValue(contributorId, out var currentPermission) && currentPermission == permission)
             {
-                var error = new ValidationError("Contributor is already part of the app with same permissions", "ContributorId");
+                var error = new ValidationError("Contributor is already part of the app with same permissions.", "ContributorId");
 
                 throw new ValidationException(message(), error);
             }
@@ -81,7 +81,7 @@ namespace Squidex.Domain.Apps.Core.Apps
 
             if (contributorsCopy.All(x => x.Value != AppContributorPermission.Owner))
             {
-                var error = new ValidationError("Contributor is the last owner", "ContributorId");
+                var error = new ValidationError("Contributor is the last owner.", "ContributorId");
 
                 throw new ValidationException(message(), error);
             }
