@@ -14,7 +14,7 @@ using Squidex.Infrastructure;
 
 namespace Squidex.Domain.Apps.Write.Apps
 {
-    public class AppContributors
+    public sealed class AppContributors
     {
         private readonly Dictionary<string, AppContributorPermission> contributors = new Dictionary<string, AppContributorPermission>();
 

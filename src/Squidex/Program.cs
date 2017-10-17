@@ -8,6 +8,7 @@
 
 using System.IO;
 using Microsoft.AspNetCore.Hosting;
+using Squidex.Config.Orleans;
 
 namespace Squidex
 {
@@ -15,6 +16,8 @@ namespace Squidex
     {
         public static void Main(string[] args)
         {
+            OrleansHostBuilder.Run();
+
             new WebHostBuilder()
                 .UseKestrel(k => { k.AddServerHeader = false; })
                 .UseContentRoot(Directory.GetCurrentDirectory())

@@ -10,6 +10,7 @@ using Autofac;
 using Microsoft.Extensions.Configuration;
 using Squidex.Domain.Apps.Core.Schemas;
 using Squidex.Domain.Apps.Core.Scripting;
+using Squidex.Domain.Apps.Write;
 using Squidex.Domain.Apps.Write.Apps;
 using Squidex.Domain.Apps.Write.Assets;
 using Squidex.Domain.Apps.Write.Contents;
@@ -59,7 +60,7 @@ namespace Squidex.Config.Domain
                 .As<IContentVersionLoader>()
                 .SingleInstance();
 
-            builder.RegisterType<AppCommandMiddleware>()
+            builder.RegisterType<OrleansCommandMiddleware>()
                 .As<ICommandMiddleware>()
                 .SingleInstance();
 
