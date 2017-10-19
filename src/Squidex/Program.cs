@@ -8,7 +8,7 @@
 
 using System.IO;
 using Microsoft.AspNetCore.Hosting;
-using Squidex.Config.Orleans;
+using Microsoft.Extensions.Configuration;
 
 namespace Squidex
 {
@@ -16,13 +16,19 @@ namespace Squidex
     {
         public static void Main(string[] args)
         {
-            OrleansHostBuilder.Run();
-
             new WebHostBuilder()
                 .UseKestrel(k => { k.AddServerHeader = false; })
                 .UseContentRoot(Directory.GetCurrentDirectory())
                 .UseIISIntegration()
                 .UseStartup<Startup>()
+                .ConfigureAppConfiguration((hostContext, options) =>
+                {
+                    options.Sources.Clear();
+                    options.AddJsonFile("appsettings.json", true, true);
+                    options.AddJsonFile($"appsettings.{hostContext.HostingEnvironment.EnvironmentName}.json", true);
+                    options.AddEnvironmentVariables();
+                    options.AddCommandLine(args);
+                })
                 .Build()
                 .Run();
         }

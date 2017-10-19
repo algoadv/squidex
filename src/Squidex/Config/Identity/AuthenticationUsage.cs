@@ -1,20 +1,22 @@
 ﻿// ==========================================================================
-//  MustBeAppDeveloperAttribute.cs
+//  AuthenticationUsage.cs
 //  Squidex Headless CMS
 // ==========================================================================
 //  Copyright (c) Squidex Group
 //  All rights reserved.
 // ==========================================================================
 
-using Squidex.Domain.Apps.Core.Apps;
+using Microsoft.AspNetCore.Builder;
 
-namespace Squidex.Pipeline
+namespace Squidex.Config.Identity
 {
-    public sealed class MustBeAppDeveloperAttribute : AppPermissionAttribute
+    public static class AuthenticationUsage
     {
-        public MustBeAppDeveloperAttribute()
-            : base(AppPermission.Developer)
+        public static IApplicationBuilder UseMyAuthentication(this IApplicationBuilder app)
         {
+            app.UseAuthentication();
+
+            return app;
         }
     }
 }
